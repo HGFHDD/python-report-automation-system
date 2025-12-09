@@ -1,0 +1,100 @@
+# Weekly KPI Report Configuration
+report:
+  name: "Weekly KPI Report"
+  description: "Weekly Key Performance Indicators summary"
+  version: "1.0"
+
+  data_source:
+    type: "postgres"
+    query: |
+      SELECT 
+        date,
+        agent_id,
+        agent_name,
+        team,
+        calls_handled,
+        avg_handling_time,
+        first_call_resolution,
+        customer_satisfaction,
+        sales_amount,
+        conversion_rate
+      FROM performance_metrics
+      WHERE date >= CURRENT_DATE - INTERVAL '7 days'
+      ORDER BY date, agent_id
+
+  transformations:
+    - type: "aggregate"
+      groupby: ["team"]
+      metrics:
+        calls_handled: "sum"
+        avg_handling_time: "mean"
+        first_call_resolution: "mean"
+        customer_satisfaction: "mean"
+        sales_amount: "sum"
+        conversion_rate: "mean"
+
+    - type: "sort"
+      by: "sales_amount"
+      ascending: false
+
+  kpis:
+    - name: "Total Calls"
+      column: "calls_handled"
+      aggregation: "sum"
+    - name: "Average Handling Time"
+      column: "avg_handling_time"
+      aggregation: "mean"
+      format: "time"
+    - name: "FCR Rate"
+      column: "first_call_resolution"
+      aggregation: "mean"
+      format: "percentage"
+    - name: "CSAT Score"
+      column: "customer_satisfaction"
+      aggregation: "mean"
+      format: "decimal"
+    - name: "Total Sales"
+      column: "sales_amount"
+      aggregation: "sum"
+      format: "currency"
+    - name: "Conversion Rate"
+      column: "conversion_rate"
+      aggregation: "mean"
+      format: "percentage"
+
+  output:
+    format: "excel"
+    filename: "weekly_kpi_report_{date}.xlsx"
+    sheets:
+      - name: "KPI Summary"
+        data: "kpis"
+      - name: "Team Performance"
+        data: "by_team"
+      - name: "Agent Details"
+        data: "details"
+      - name: "Trends"
+        data: "trends"
+
+    charts:
+      - type: "bar"
+        title: "Sales by Team"
+        x: "team"
+        y: "sales_amount"
+
+      - type: "line"
+        title: "CSAT Trend"
+        x: "date"
+        y: "customer_satisfaction"
+
+  distribution:
+    email:
+      to:
+        - "operations-manager@company.com"
+        - "team-leads@company.com"
+      subject: "Weekly KPI Report - Week {week_number}"
+      template: "default.html"
+
+  schedule:
+    type: "cron"
+    expression: "0 9 * * 1"  # Every Monday at 09:00
+    timezone: "America/Santiago"

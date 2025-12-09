@@ -1,0 +1,141 @@
+# Monthly Summary Report Configuration
+report:
+  name: "Monthly Summary Report"
+  description: "Comprehensive monthly business summary"
+  version: "1.0"
+
+  data_source:
+    type: "postgres"
+    query: |
+      SELECT 
+        date,
+        department,
+        revenue,
+        costs,
+        profit,
+        headcount,
+        productivity_index,
+        customer_count,
+        new_customers,
+        churned_customers
+      FROM monthly_summary
+      WHERE date >= DATE_TRUNC('month', CURRENT_DATE)
+      ORDER BY date
+
+  transformations:
+    - type: "aggregate"
+      groupby: ["department"]
+      metrics:
+        revenue: "sum"
+        costs: "sum"
+        profit: "sum"
+        headcount: "mean"
+        productivity_index: "mean"
+        customer_count: "last"
+        new_customers: "sum"
+        churned_customers: "sum"
+
+    - type: "calculate"
+      name: "profit_margin"
+      expression: "(profit / revenue) * 100"
+
+    - type: "calculate"
+      name: "net_customer_growth"
+      expression: "new_customers - churned_customers"
+
+    - type: "sort"
+      by: "profit"
+      ascending: false
+
+  kpis:
+    - name: "Total Revenue"
+      column: "revenue"
+      aggregation: "sum"
+      format: "currency"
+      compare_previous: true
+    - name: "Total Profit"
+      column: "profit"
+      aggregation: "sum"
+      format: "currency"
+      compare_previous: true
+    - name: "Profit Margin"
+      column: "profit_margin"
+      aggregation: "mean"
+      format: "percentage"
+    - name: "Customer Base"
+      column: "customer_count"
+      aggregation: "last"
+      format: "number"
+    - name: "Net Customer Growth"
+      column: "net_customer_growth"
+      aggregation: "sum"
+      format: "number"
+      compare_previous: true
+
+  output:
+    formats:
+      - type: "excel"
+        filename: "monthly_summary_{month}_{year}.xlsx"
+      - type: "pdf"
+        filename: "monthly_summary_{month}_{year}.pdf"
+        template: "executive_report"
+
+    excel_sheets:
+      - name: "Executive Summary"
+        data: "kpis"
+      - name: "Department Performance"
+        data: "by_department"
+      - name: "Financial Details"
+        data: "financials"
+      - name: "Customer Metrics"
+        data: "customers"
+      - name: "Month Over Month"
+        data: "comparison"
+
+    charts:
+      - type: "bar"
+        title: "Revenue by Department"
+        x: "department"
+        y: "revenue"
+
+      - type: "line"
+        title: "Revenue & Profit Trend"
+        x: "date"
+        y: ["revenue", "profit"]
+
+      - type: "pie"
+        title: "Cost Distribution"
+        labels: "department"
+        values: "costs"
+
+      - type: "bar"
+        title: "Customer Growth"
+        x: "department"
+        y: ["new_customers", "churned_customers"]
+        stacked: true
+
+  distribution:
+    email:
+      to:
+        - "ceo@company.com"
+        - "cfo@company.com"
+        - "executives@company.com"
+      cc:
+        - "board@company.com"
+      subject: "Monthly Business Summary - {month} {year}"
+      template: "executive_email.html"
+      priority: "high"
+
+    cloud_storage:
+      provider: "azure"
+      container: "monthly-reports"
+      path: "{year}/{month}/"
+
+  schedule:
+    type: "cron"
+    expression: "0 10 1 * *"  # First day of every month at 10:00
+    timezone: "America/Santiago"
+
+  retention:
+    days: 365
+    archive: true

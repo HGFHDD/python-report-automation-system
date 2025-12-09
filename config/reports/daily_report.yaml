@@ -1,0 +1,81 @@
+# Daily Sales Report Configuration
+report:
+  name: "Daily Sales Report"
+  description: "Automated daily sales report with KPIs and trends"
+  version: "1.0"
+
+  data_source:
+    type: "postgres"
+    query: |
+      SELECT 
+        date,
+        product_id,
+        product_name,
+        category,
+        quantity,
+        unit_price,
+        total_amount,
+        customer_id,
+        region
+      FROM sales
+      WHERE date = CURRENT_DATE
+      ORDER BY total_amount DESC
+
+  transformations:
+    - type: "aggregate"
+      groupby: ["category"]
+      metrics:
+        total_amount: "sum"
+        quantity: "sum"
+        unit_price: "mean"
+
+    - type: "sort"
+      by: "total_amount"
+      ascending: false
+
+  output:
+    format: "excel"
+    filename: "daily_sales_{date}.xlsx"
+    sheets:
+      - name: "Summary"
+        data: "summary"
+      - name: "Details"
+        data: "details"
+      - name: "By Category"
+        data: "by_category"
+
+    charts:
+      - type: "bar"
+        title: "Sales by Category"
+        x: "category"
+        y: "total_amount"
+
+      - type: "pie"
+        title: "Category Distribution"
+        labels: "category"
+        values: "total_amount"
+
+  distribution:
+    email:
+      to:
+        - "manager@company.com"
+        - "sales-team@company.com"
+      cc:
+        - "director@company.com"
+      subject: "Daily Sales Report - {date}"
+      template: "default.html"
+
+  schedule:
+    type: "cron"
+    expression: "0 9 * * *"  # Every day at 09:00
+    timezone: "America/Santiago"
+
+  notifications:
+    on_success:
+      - type: "email"
+        to: ["admin@company.com"]
+        subject: "Report Generated Successfully"
+    on_failure:
+      - type: "email"
+        to: ["admin@company.com"]
+        subject: "Report Generation Failed"
